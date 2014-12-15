@@ -1,9 +1,21 @@
+require "httparty"
+
 class Apnic
-  def fetch_apnic(debug: false)
-    @file ||= if debug
+  include HTTParty
+
+  headers "Accept-Encoding" => "gzip"
+
+  def initialize(debug: false)
+    @debug = debug
+  end
+
+
+  def fetch_apnic
+    @file ||= if @debug
       File.open('apnic_debug').read
     else
-      HTTParty.get('http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest', headers: {"Accept-Encoding" => "gzip"}).body
+      puts '下载最新的 apnic 文件中.....'
+      self.class.get('http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest').body
     end
     self
   end
@@ -36,7 +48,7 @@ class Apnic
 end
 
 
-a = Apnic.new.fetch_apnic(debug: true)
+a = Apnic.new(debug: false).fetch_apnic
 puts a.off_china_list
 
 
